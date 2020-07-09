@@ -18,7 +18,7 @@ Once you have the refresh tokens, its now up to the Power BI M query to do all t
 
 ## Azure Policy
 
-In order to have something meaningful come out the other side, you need to tag all your resource groups. I chose to make four tags necessary for all [Solliance](https://www.solliance.net/) Resource Groups:
+In order to have something meaningful come out the other side, you need to tag all your resource groups. I chose to make four tags necessary for all [Solliance](https://www.solliance.net/) Resource Groups and use [Azure Policy](https://docs.microsoft.com/en-us/azure/governance/policy/overview) to enforce it:
 
 - Project
 - Contact
