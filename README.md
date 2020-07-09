@@ -16,6 +16,17 @@ That's where the PowerShell script comes into play. The Azure PowerShell uses ot
 
 Once you have the refresh tokens, its now up to the Power BI M query to do all the work.  That's where we need to do lots of looping.
 
+## Azure Policy
+
+In order to have something meaningful come out the other side, you need to tag all your resources. I chose to make four tags necessary for all Solliance Resource Groups:
+
+- Project
+- Contact
+- MonthlyCost
+- EndDate
+
+These are now mandatory on all Solliance resources and you are forced to update any ARM templates or PowerShell that created a resource group to include these tags. If you do not, the ARM template or PowerShell deploy will fail.
+
 ## Artifacts
 
 - PowerShell Script
