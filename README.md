@@ -45,3 +45,5 @@ Oh you know why.  All those random events where a sudden bill shows up and someo
 [Solliance](https://www.solliance.net/) is at the top of the chain when it comes to Data and AI. We do stuff others think impossible. We encourage you to test us and challenge us. You'll be surprised what you get.
 
 If you like this and you want more, [email me](mailto:chris@solliance.net) and let's see what we can do for you!
+
+Like this?  Follow [@Solliance](https://twitter.com/solliance) and [@givenscj](https://twitter.com/givenscj)
