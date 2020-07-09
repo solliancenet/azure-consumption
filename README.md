@@ -46,4 +46,4 @@ Oh you know why.  All those random events where a sudden bill shows up and someo
 
 If you like this and you want more, [email me](mailto:chris@solliance.net) and let's see what we can do for you!
 
-Like this?  Follow [@Solliance](https://twitter.com/solliance) and [@givenscj](https://twitter.com/givenscj)
+Like this?  Follow [@SollianceNet](https://twitter.com/solliancenet) and [@givenscj](https://twitter.com/givenscj)
