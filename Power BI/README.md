@@ -71,18 +71,38 @@ in
     #"Renamed Columns"
 ```
 
+This M Query should get all the subscriptions in the context of the access token provided. The API VERSION is important as you will see different behavior across all of them. In some cases the call will return **every** subscription you have access to even though you received an access token from a specific tenant.
+
+> **NOTE** ApiVersion is `extremely` important when dealing with Azure endpoints.
+
 ## AllConsumption
+
+TODO
 
 ## ResourceGroups
 
+TODO
+
 ## BillingPeriod
+
+TODO
 
 ## AzureTenants
 
+TODO
+
 ## Budgets
+
+TODO
 
 ## Accounts
 
+TODO
+
 ## TenantId
 
-## Tokems
+You should make this the default/main tenantId from which all of your subscriptions derive. It is the one that tends to be falled back on when an api call is generic in nature and returns everything in which you have access (despite your context).
+
+## Tokens
+
+TODO
