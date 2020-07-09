@@ -304,7 +304,18 @@ in
 
 ## Accounts
 
-TODO
+This data is your tenant and subscription data with some customization columns.  Not every subscription is created equal and supported every API version.  You may need to set these values to make all the calls work in the dynamic queries:
+
+```PowerShell
+let
+    Source = Csv.Document(File.Contents("C:\temp\accounts.csv"),[Delimiter=",", Columns=11, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"cloudName", type text}, {"homeTenantId", type text}, {"id", type text}, {"isDefault", type logical}, {"managedByTenants", type text}, {"name", type text}, {"state", type text}, {"tenantId", type text}, {"user", type text}}),
+    #"Filtered Rows" = Table.SelectRows(#"Changed Type", each ([tenantId] = TenantId)),
+    #"Filtered Rows1" = Table.SelectRows(#"Filtered Rows", each ([homeTenantId] <> null and [homeTenantId] <> "") and ([isEnabled] = "TRUE"))
+in
+    #"Filtered Rows1"
+```
 
 ## TenantId
 
@@ -312,4 +323,12 @@ You should make this the default/main tenantId from which all of your subscripti
 
 ## Tokens
 
-TODO
+You will need refresh tokens for each tenant. In most cases your main refresh token will work across many of your subscriptions, however there may be exceptions. This data generated from your Azure PowerShell commands will output all your refresh tokens which all of the above M queries will reference and use to generate new access tokens for each tenant:
+
+```PowerShell
+let
+    Source = Csv.Document(File.Contents("C:\temp\tokens.csv"),[Delimiter=",", Columns=3, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true])
+in
+    #"Promoted Headers"
+```
