@@ -77,7 +77,113 @@ This M Query should get all the subscriptions in the context of the access token
 
 ## AllConsumption
 
-TODO
+```PowerShell
+let
+    iterations = 10,
+    BillingPeriod = if BillingPeriod = null then DateTime.ToText(DateTime.LocalNow(), "yyyyMM") & "01" else BillingPeriod,
+    //Subscriptions = Table.SelectColumns(Accounts,{"id"}),
+
+    FnGetTenants = 
+    (Id as text) =>
+    let
+        clientId = Table.SelectRows(Tokens, each ([TenantId] = Id))[ClientId]{0},
+        refreshToken = Table.SelectRows(Tokens, each ([TenantId] = Id))[RefreshToken]{0},
+        apiUrl = "https://login.microsoftonline.com/" & TenantId & "/oauth2/token",
+        body = "client_id=" & clientId & "&grant_type=refresh_token&refresh_token=" & refreshToken,
+        Auth = Json.Document(Web.Contents(apiUrl, [Content = Text.ToBinary(body), Headers = [Accept = "application/json", #"Content-Type" = "application/x-www-form-urlencoded"]])),
+        accessToken = Auth[access_token],
+
+        fullUrl = "https://management.azure.com/subscriptions?api-version=2020-01-01",
+        SubList2 = Json.Document(Web.Contents(fullUrl, [Headers=[Authorization="Bearer " & accessToken], Query=[#"api-version"="2020-01-01"]])),
+        
+        value = SubList2[value],
+        #"Converted to Table" = Table.FromList(value, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+        #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"id", "authorizationSource", "managedByTenants", "subscriptionId", "tenantId", "displayName", "state", "subscriptionPolicies"}, {"Column1.id", "Column1.authorizationSource", "Column1.managedByTenants", "Column1.subscriptionId", "Column1.tenantId", "Column1.displayName", "Column1.state", "Column1.subscriptionPolicies"}),
+        #"Removed Duplicates" = Table.Distinct(#"Expanded Column1", {"Column1.id"}),
+        #"Renamed Columns" = Table.RenameColumns(#"Removed Duplicates",{{"Column1.subscriptionId", "SubscriptionId"}}),
+        
+        SubList = List.Transform(#"Renamed Columns"[SubscriptionId], each FnGetUrl(_)),
+
+        SubList3 = List.Transform(SubList, each FnGetAllPages(_, accessToken)),
+
+        FinalTable = Table.FromList(SubList3, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+        FinalList = Table.AddColumn(FinalTable, "TenantId", each Id)
+        
+    in
+        FinalList,
+        //#"Renamed Columns",
+        //#"Expanded Column1",
+        //#"Expanded Column1.Column1",
+        //#"Converted to Table",
+        //value,
+
+    FnGetUrl = 
+    (Id as text) =>
+    let
+        //Source =  "/" & Id & "/providers/Microsoft.Billing/billingPeriods/" & BillingPeriod & "/providers/Microsoft.Consumption/usageDetails?$top=1000&api-version=2017-11-30"
+        Source =  "https://management.azure.com/subscriptions/" & Id & "/providers/Microsoft.Billing/billingPeriods/" & BillingPeriod & "/providers/Microsoft.Consumption/usageDetails?$top=1000&api-version=2017-11-30"
+    in
+        Source,
+
+    FnGetOnePage =
+     (url, accessToken) as record =>
+     try(
+      let
+       //Source = Function.InvokeAfter(Json.Document(Web.Contents(url), #duration(0,0,0,5))),
+       Source = Json.Document(Web.Contents(url, [Headers=[Authorization="Bearer " & accessToken]])),
+       data = try Source[value] otherwise null,
+       next = try Source[nextLink] otherwise null,
+       res = [Data=data, Next=next]
+      in
+       res
+     )
+     otherwise
+     (
+         let 
+         res = null
+         in 
+         res
+     ),
+
+    FnGetAllPages = 
+     (url, accessToken) as list =>
+     let 
+        All = List.Generate(
+            ()=>[i=0, res = FnGetOnePage(url, accessToken)],
+            each [i]<iterations and [res][Data]<>null,
+            each [i=[i]+1, res = FnGetOnePage([res][Next], accessToken)],
+            each [res][Data])
+      in
+    All,
+
+    //SubList = List.Transform(Subscriptions[id], each FnGetUrl(_)),
+    //SubList2 = List.Transform(SubList, each FnGetAllPages(_)),
+
+    SubList2 = List.Transform(AzureTenants, each FnGetTenants(_)),
+
+    #"Converted to Table" = Table.FromList(SubList2, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Expanded Column1" = Table.ExpandListColumn(#"Converted to Table", "Column1"),
+    #"Expanded Column4" = Table.ExpandRecordColumn(#"Expanded Column1", "Column1", {"Column1", "TenantId"}, {"Column1.Column1", "Column1.TenantId"}),
+    #"Expanded Column1.Column1" = Table.ExpandListColumn(#"Expanded Column4", "Column1.Column1"),
+    #"Expanded Column2" = Table.ExpandListColumn(#"Expanded Column1.Column1", "Column1.Column1"),
+    #"Expanded Column3" = Table.ExpandRecordColumn(#"Expanded Column2", "Column1.Column1", {"id", "name", "type", "tags", "properties"}, {"Column1.id", "Column1.name", "Column1.type", "Column1.tags", "Column1.properties"}),
+    #"Expanded Column1.tags" = Table.ExpandRecordColumn(#"Expanded Column3", "Column1.tags", {"billing"}, {"Column1.tags.billing"}),
+    #"Expanded Column1.properties" = Table.ExpandRecordColumn(#"Expanded Column1.tags", "Column1.properties", {"billingPeriodId", "usageStart", "usageEnd", "instanceId", "instanceName", "instanceLocation", "meterId", "usageQuantity", "pretaxCost", "currency", "isEstimated", "subscriptionGuid", "subscriptionName", "accountName", "departmentName", "product", "consumedService", "costCenter", "meterDetails"}, {"Column1.properties.billingPeriodId", "Column1.properties.usageStart", "Column1.properties.usageEnd", "Column1.properties.instanceId", "Column1.properties.instanceName", "Column1.properties.instanceLocation", "Column1.properties.meterId", "Column1.properties.usageQuantity", "Column1.properties.pretaxCost", "Column1.properties.currency", "Column1.properties.isEstimated", "Column1.properties.subscriptionGuid", "Column1.properties.subscriptionName", "Column1.properties.accountName", "Column1.properties.departmentName", "Column1.properties.product", "Column1.properties.consumedService", "Column1.properties.costCenter", "Column1.properties.meterDetails"}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Column1.properties",{{"Column1.properties.pretaxCost", type number}}),
+    #"Added Custom" = Table.AddColumn(#"Changed Type", "ResourceGroup", each Text.Split([Column1.properties.instanceId], "/"){4}),
+    #"Filtered Rows1" = Table.SelectRows(#"Added Custom", each [Column1.id] <> null and [Column1.id] <> ""),
+    #"Added Custom1" = Table.AddColumn(#"Filtered Rows1", "ResourceGroupId", each "/subscriptions/" & [Column1.properties.subscriptionGuid] & "/resourceGroups/" & [ResourceGroup]),
+    #"Filtered Rows" = Table.SelectRows(#"Added Custom1", each [Column1.id] <> null and [Column1.id] <> ""),
+    #"Merged Queries" = Table.NestedJoin(#"Filtered Rows", {"ResourceGroupId"}, ResourceGroups, {"ResourceId"}, "ResourceGroups", JoinKind.LeftOuter),
+    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Merged Queries", {"Column1.id"}),
+    #"Expanded ResourceGroups" = Table.ExpandTableColumn(#"Removed Errors", "ResourceGroups", {"ResourceId", "Name", "Column1.type", "MonthlyCost", "Contact", "Project", "EndDate", "Column1.properties.provisioningState"}, {"ResourceGroups.ResourceId", "ResourceGroups.Name", "ResourceGroups.Column1.type", "ResourceGroups.MonthlyCost", "ResourceGroups.Contact", "ResourceGroups.Project", "ResourceGroups.EndDate", "ResourceGroups.Column1.properties.provisioningState"}),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Expanded ResourceGroups",{{"ResourceGroups.MonthlyCost", type number}}),
+    #"Added Custom2" = Table.AddColumn(#"Changed Type1", "Custom", each [Column1.properties.pretaxCost] > [ResourceGroups.MonthlyCost]),
+    #"Renamed Columns" = Table.RenameColumns(#"Added Custom2",{{"Column1.properties.pretaxCost", "PreTaxCost"}, {"Column1.properties.consumedService", "ConsumedService"}, {"Column1.properties.product", "Product"}, {"Column1.properties.subscriptionName", "SubscriptionName"}}),
+    #"Lowercased Text" = Table.TransformColumns(#"Renamed Columns",{{"ResourceGroupId", Text.Lower, type text}})
+in
+    #"Lowercased Text"
+```
 
 ## ResourceGroups
 
