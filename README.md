@@ -18,16 +18,20 @@ Once you have the refresh tokens, its now up to the Power BI M query to do all t
 
 ## Azure Policy
 
-In order to have something meaningful come out the other side, you need to tag all your resources. I chose to make four tags necessary for all Solliance Resource Groups:
+In order to have something meaningful come out the other side, you need to tag all your resource groups. I chose to make four tags necessary for all [Solliance](https://www.solliance.net/) Resource Groups:
 
 - Project
 - Contact
 - MonthlyCost
 - EndDate
 
-These are now mandatory on all Solliance resources and you are forced to update any ARM templates or PowerShell that created a resource group to include these tags. If you do not, the ARM template or PowerShell deploy will fail.
+These are now mandatory on all [Solliance](https://www.solliance.net/) resources and you are forced to update any ARM templates or PowerShell that created a resource group to include these tags. If you do not, the ARM template or PowerShell deploy will fail.
+
+## Why?
+
+Oh you know why.  All those random events where a sudden bill shows up and someone says...ooops.  I forgot to turn that off.  Yeah, this will stop that.
 
 ## Artifacts
 
-- PowerShell Script
+- PowerShell Scripts
 - Power BI Queries
