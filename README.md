@@ -1,4 +1,4 @@
-# Azure Consumption Power BI
+# Azure Consumption with Power BI
 
 This set of docs shows you how to setup Power BI reports to dynamically pull your subscription usage details and then show you costs for each resource group. It is Power BI refresh friendly, which is hard to do.
 
@@ -33,5 +33,11 @@ Oh you know why.  All those random events where a sudden bill shows up and someo
 
 ## Artifacts
 
-- PowerShell Scripts
-- Power BI Queries
+- [PowerShell Scripts](/PowerShell/README.md)
+- [Power BI Queries](Power%20BI/README.md)
+
+## Consulting and errata
+
+Solliance is at the top of the chain when it comes to Data and AI. We do stuff others think impossible. We encourage you to test us and challenge us. You'll be surprise what you get.
+
+If you like this and you want more, [email me](mailto:chris@solliance.net) and let's see what we can do for you!
