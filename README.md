@@ -1,6 +1,8 @@
 # Azure Consumption with Power BI
 
-This set of docs shows you how to setup Power BI reports to dynamically pull your subscription usage details and then show you costs for each resource group. It is Power BI refresh friendly, which is hard to do.
+This set of docs shows you how to setup Power BI reports to dynamically pull your subscription usage details and then show you costs for each resource group. It is Power BI refresh friendly, which is hard to do.  You want this don't you?!?
+
+![Budget view.](/media/Budgets.png "Budgets overdrawn")
 
 This repo contains the PowerShell scripts to setup your initial inputs and the Power BI M queries to get it all working.
 
