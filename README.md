@@ -4,6 +4,8 @@ This set of docs shows you how to setup Power BI reports to dynamically pull you
 
 ![Budget view.](/media/Budgets.png "Budgets overdrawn")
 
+![Costs by subscription view.](/media/CostBySubscription.png "Subscription costs")
+
 This repo contains the PowerShell scripts to setup your initial inputs and the Power BI M queries to get it all working.
 
 You need to initially generate two files.  An accounts files and a tokens file. These will contain the data needed to do the access token refresh and other necessary look up details when the other queries run.
