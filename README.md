@@ -40,6 +40,10 @@ Oh you know why.  All those random events where a sudden bill shows up and someo
 - [PowerShell Scripts](/PowerShell/README.md)
 - [Power BI Queries](Power%20BI/README.md)
 
+## Issues
+
+If you only create Azure Policy that enforces resource group tags, you will run into issues where Azure resources create their own `managed` resource groups.  This is the case for Azure Databricks and SQL Managed Instance.  You must also create `inherit` policies so that those resource inherit the tags and thusly the managed resource groups they created also get them.  If you do not do this, the creation of these resources will fail.
+
 ## Consulting and errata
 
 [Solliance](https://www.solliance.net/) is at the top of the chain when it comes to Data and AI. We do stuff others think impossible. We encourage you to test us and challenge us. You'll be surprised what you get.
